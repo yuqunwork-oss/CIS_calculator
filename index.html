@@ -68,6 +68,25 @@
     text-wrap: balance;
   }
   .lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 14px; }
+  .logo-link { display: block; }
+  .logo-link:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; }
+  .product-link {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 8px 18px;
+    border: 1px solid var(--fg);
+    border-radius: 2px;
+    color: var(--fg);
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+  .product-link:hover { background: var(--fg); color: var(--bg); }
+  .product-link:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
 
   /* One tool per row: title | inputs | results. Stacks to a single column on narrow screens. */
   .grid { display: grid; border-top: 1px solid var(--line-strong); }
@@ -229,7 +248,7 @@
 <body>
 <div class="topbar">
   <div class="topbar-inner">
-    <img class="logo" src="assets/jidien-logo.png" alt="JIDIEN 中和碁電" width="801" height="113">
+    <a class="logo-link" href="https://www.jidien.com/zh_tw/" target="_blank" rel="noopener"><img class="logo" src="assets/jidien-logo.png" alt="JIDIEN 中和碁電 官網" width="801" height="113"></a>
     <span class="topbar-tag">CIS TOOLS</span>
   </div>
 </div>
@@ -238,6 +257,7 @@
   <header class="intro">
     <h1>CIS DPI 與掃描時間換算</h1>
     <p class="lede">在米色欄位輸入數字，結果會即時算出來。三個工具各自獨立，可以分別輸入。</p>
+    <a class="product-link" href="https://www.jidien.com/zh_tw/product/index.php?index_m1_id=621&amp;index_m2_id=864" target="_blank" rel="noopener">CIS 產品資訊<span aria-hidden="true">→</span></a>
   </header>
 
   <div class="grid">
