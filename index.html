@@ -122,6 +122,58 @@
   .input-row input[aria-invalid="true"] { border-color: var(--accent); }
   .unit { width: 44px; font-size: 13px; color: var(--muted); }
 
+  /* Combo: type a number, or open the list of INSNEX LineX specs with the ▾ button. */
+  .combo { position: relative; flex: 1; min-width: 0; display: flex; }
+  .combo input { padding-right: 44px; }
+  .drop {
+    position: absolute;
+    top: 1px; right: 1px; bottom: 1px;
+    width: 38px;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .drop:hover, .drop[aria-expanded="true"] { color: var(--fg); background: var(--bg); }
+  .drop:focus-visible { outline: 1px solid var(--fg); outline-offset: -2px; }
+  .options {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    z-index: 10;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    box-shadow: 0 6px 18px rgba(60, 58, 54, 0.08);
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .options[hidden] { display: none; }
+  .options button {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 12px;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .options button:hover, .options button:focus-visible { outline: none; background: var(--kinari); }
+  .options .v { font-family: var(--font-num); font-size: 15px; }
+  .options .s { font-size: 12px; color: var(--muted); }
+  .options button[aria-selected="true"] .v { color: var(--accent); }
+
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip {
     font-family: var(--font-num);
@@ -203,12 +255,11 @@
         <div class="label">輸入</div>
         <div class="field">
           <label for="a-dpi">DPI</label>
-          <div class="input-row"><input id="a-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"><span class="unit">dpi</span></div>
-          <div class="chips" data-for="a-dpi"><button type="button" class="chip">600</button><button type="button" class="chip">1200</button><button type="button" class="chip">1800</button><button type="button" class="chip">3600</button></div>
+          <div class="input-row"><div class="combo" data-list="dpi"><input id="a-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"></div><span class="unit">dpi</span></div>
         </div>
         <div class="field">
           <label for="a-w">掃描寬度</label>
-          <div class="input-row"><input id="a-w" type="number" inputmode="decimal" min="0" step="any" value="300"><span class="unit">mm</span></div>
+          <div class="input-row"><div class="combo" data-list="width"><input id="a-w" type="number" inputmode="decimal" min="0" step="any" value="300"></div><span class="unit">mm</span></div>
         </div>
       </div>
       <div class="fields">
@@ -239,7 +290,7 @@
         </div>
         <div class="field">
           <label for="b-w">掃描寬度</label>
-          <div class="input-row"><input id="b-w" type="number" inputmode="decimal" min="0" step="any" value="300"><span class="unit">mm</span></div>
+          <div class="input-row"><div class="combo" data-list="width"><input id="b-w" type="number" inputmode="decimal" min="0" step="any" value="300"></div><span class="unit">mm</span></div>
         </div>
       </div>
       <div class="fields">
@@ -265,8 +316,7 @@
         <div class="label">輸入</div>
         <div class="field">
           <label for="c-dpi">DPI</label>
-          <div class="input-row"><input id="c-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"><span class="unit">dpi</span></div>
-          <div class="chips" data-for="c-dpi"><button type="button" class="chip">600</button><button type="button" class="chip">1200</button><button type="button" class="chip">1800</button><button type="button" class="chip">3600</button></div>
+          <div class="input-row"><div class="combo" data-list="dpi"><input id="c-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"></div><span class="unit">dpi</span></div>
         </div>
         <div class="field">
           <label for="c-lr">行頻（line rate）</label>
@@ -293,6 +343,7 @@
   <aside class="notes">
     <h3>說明</h3>
     <ul>
+      <li>DPI 和掃描寬度可以直接輸入，或按 ▾ 從清單選；清單取自 INSNEX LineX CIS 產品手冊（2026-06-16）的 LineX 2、LXM、CHVS 系列。</li>
       <li>預設數值是範例，請改成實際規格。行頻請填 CIS 規格書上，該 DPI 對應的最高行頻。</li>
       <li>掃描時間不需要寬度：CIS 一次就拍完整條寬度，寬度只影響每秒的資料量。</li>
       <li>相機規格的 K 通常是 1,024 的倍數（16K = 16,384 像素）；行頻的 kHz 一律是 1,000。</li>
@@ -354,6 +405,83 @@
       group.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.textContent === v)));
     });
   }
+
+  // Options from the INSNEX LineX CIS brochure (2026-06-16), spec tables on pages 9-10.
+  const LISTS = {
+    dpi: [
+      [300, "CHVS"], [600, "CHVS"], [900, "LX2 / LXM"],
+      [1200, "CHVS 經濟款"], [1800, "LX2 / LXM"], [3600, "LXM"],
+    ],
+    width: [
+      [135, "LXM"], [164, "CHVS 經濟款"], [165, "LX2 / LXM"], [242, "CHVS"],
+      [270, "LXM"], [310, "CHVS 經濟款"], [328, "LX2 / LXM"], [363, "CHVS"],
+      [490, "LX2 / LXM"], [550, "CHVS"], [656, "LX2 / LXM"], [813, "CHVS"],
+      [815, "LX2"], [820, "LXM"], [934, "CHVS"], [1539, "CHVS"],
+    ],
+  };
+
+  const closeAll = (except) => document.querySelectorAll(".combo").forEach((c) => {
+    if (c === except) return;
+    c.querySelector(".options").hidden = true;
+    c.querySelector(".drop").setAttribute("aria-expanded", "false");
+  });
+
+  document.querySelectorAll(".combo").forEach((combo) => {
+    const input = combo.querySelector("input");
+    const label = document.querySelector(`label[for="${input.id}"]`).textContent;
+    const drop = document.createElement("button");
+    drop.type = "button";
+    drop.className = "drop";
+    drop.textContent = "▾";
+    drop.setAttribute("aria-label", `選擇${label}`);
+    drop.setAttribute("aria-haspopup", "listbox");
+    drop.setAttribute("aria-expanded", "false");
+    const list = document.createElement("ul");
+    list.className = "options";
+    list.setAttribute("role", "listbox");
+    list.setAttribute("aria-label", label);
+    list.hidden = true;
+    for (const [v, series] of LISTS[combo.dataset.list]) {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("role", "option");
+      b.dataset.value = v;
+      b.innerHTML = `<span class="v">${v.toLocaleString("en-US")}</span><span class="s">${series}</span>`;
+      li.append(b);
+      list.append(li);
+    }
+    combo.append(drop, list);
+
+    const open = () => {
+      closeAll(combo);
+      list.hidden = false;
+      drop.setAttribute("aria-expanded", "true");
+      const opts = [...list.querySelectorAll("button")];
+      opts.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.value === input.value.trim())));
+      (opts.find((b) => b.getAttribute("aria-selected") === "true") || opts[0]).focus();
+    };
+    const close = () => { list.hidden = true; drop.setAttribute("aria-expanded", "false"); };
+
+    drop.addEventListener("click", () => (list.hidden ? open() : close()));
+    input.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" && e.altKey) { e.preventDefault(); open(); } });
+    list.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      input.value = b.dataset.value;
+      close();
+      input.focus();
+      calc();
+    });
+    list.addEventListener("keydown", (e) => {
+      const opts = [...list.querySelectorAll("button")];
+      const i = opts.indexOf(document.activeElement);
+      if (e.key === "ArrowDown") { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); opts[Math.max(i - 1, 0)].focus(); }
+      else if (e.key === "Escape") { close(); drop.focus(); }
+    });
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".combo")) closeAll(); });
 
   document.querySelectorAll("input").forEach((el) => el.addEventListener("input", calc));
   document.querySelectorAll(".chips").forEach((group) => {
