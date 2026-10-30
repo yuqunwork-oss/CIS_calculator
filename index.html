@@ -60,12 +60,6 @@
   .wrap { padding-block: 56px 72px; display: grid; gap: 48px; }
 
   header.intro { display: grid; gap: 10px; }
-  .eyebrow {
-    font-family: var(--font-num);
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    color: var(--accent);
-  }
   h1 {
     margin: 0;
     font-size: clamp(24px, 3.4vw, 32px);
@@ -97,7 +91,6 @@
   .tool-head { display: grid; gap: 6px; }
   .tool-no { font-family: var(--font-num); font-size: 13px; color: var(--accent); letter-spacing: 0.12em; }
   .tool-head h2 { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: 0.1em; }
-  .tool-head p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.8; }
 
   .label {
     font-size: 12px;
@@ -226,10 +219,6 @@
     overflow-x: auto;
   }
 
-  .notes { display: grid; gap: 8px; max-width: 72ch; font-size: 13px; color: var(--muted); }
-  .notes h3 { margin: 0; font-size: 13px; font-weight: 500; color: var(--fg); letter-spacing: 0.16em; }
-  .notes ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
-
   footer {
     border-top: 1px solid var(--line);
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -247,7 +236,6 @@
 
 <main class="wrap">
   <header class="intro">
-    <div class="eyebrow">1 INCH = 25.4 MM</div>
     <h1>CIS DPI 與掃描時間換算</h1>
     <p class="lede">在米色欄位輸入數字，結果會即時算出來。三個工具各自獨立，可以分別輸入。</p>
   </header>
@@ -257,7 +245,6 @@
       <div class="tool-head">
         <span class="tool-no">01</span>
         <h2 id="t1">DPI 換算</h2>
-        <p>已知 DPI 和寬度，求像素大小和幾 K</p>
       </div>
       <div class="fields">
         <div class="label">輸入</div>
@@ -287,7 +274,6 @@
       <div class="tool-head">
         <span class="tool-no">02</span>
         <h2 id="t2">反算 DPI</h2>
-        <p>已知幾 K 和寬度，求需要多少 DPI</p>
       </div>
       <div class="fields">
         <div class="label">輸入</div>
@@ -318,7 +304,6 @@
       <div class="tool-head">
         <span class="tool-no">03</span>
         <h2 id="t3">掃描時間</h2>
-        <p>已知 DPI、行頻和長度，求掃描速度和時間</p>
       </div>
       <div class="fields">
         <div class="label">輸入</div>
@@ -347,17 +332,6 @@
       </div>
     </section>
   </div>
-
-  <aside class="notes">
-    <h3>說明</h3>
-    <ul>
-      <li>DPI 和掃描寬度可以直接輸入，或按 ▾ 從清單選；清單取自 INSNEX LineX CIS 產品手冊（2026-06-16）的 LineX 2、LXM、CHVS 系列。</li>
-      <li>預設數值是範例，請改成實際規格。行頻請填 CIS 規格書上，該 DPI 對應的最高行頻。</li>
-      <li>掃描時間不需要寬度：CIS 一次就拍完整條寬度，寬度只影響每秒的資料量。</li>
-      <li>相機規格的 K 通常是 1,024 的倍數（16K = 16,384 像素）；行頻的 kHz 一律是 1,000。</li>
-      <li>可抓瑕疵大小是經驗值（瑕疵佔 5～10 像素），實際還會受鏡頭清晰度、景深與對比影響。</li>
-    </ul>
-  </aside>
 </main>
 
 <footer>
