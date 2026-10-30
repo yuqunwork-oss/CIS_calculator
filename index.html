@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CIS DPI & Scan Time Calculator｜JIDIEN 中和碁電</title>
+<link rel="icon" href="assets/jidien-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Muji-style: plain white page, kinari (unbleached) tints, hairline rules, generous whitespace, one muted red accent. Single light theme by design. */
+  :root {
+    --bg: #ffffff;
+    --kinari: #f7f4ee;
+    --line: #e2ddd3;
+    --line-strong: #c9c2b5;
+    --fg: #3c3a36;
+    --muted: #8a857c;
+    --accent: #7f0019;
+    --input-fg: #3c3a36;
+    --font-body: "Noto Sans TC", "Hiragino Sans", "Microsoft JhengHei", sans-serif;
+    --font-num: "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+  }
+
+  .topbar {
+    border-bottom: 1px solid var(--line);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .topbar-inner, .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  .topbar-inner {
+    padding-block: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo { display: block; height: 34px; width: auto; max-width: 100%; }
+  .topbar-tag { font-size: 12px; color: var(--muted); letter-spacing: 0.12em; }
+
+  .wrap { padding-block: 56px 72px; display: grid; gap: 48px; }
+
+  header.intro { display: grid; gap: 10px; }
+  .eyebrow {
+    font-family: var(--font-num);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(24px, 3.4vw, 32px);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-wrap: balance;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 14px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--line-strong);
+  }
+  .tool {
+    padding: 28px 28px 32px;
+    display: grid;
+    gap: 22px;
+    align-content: start;
+    min-width: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .tool + .tool { border-left: 1px solid var(--line); }
+  @media (max-width: 960px) { .tool + .tool { border-left: 0; } }
+
+  .tool-head { display: grid; gap: 2px; }
+  .tool-no { font-family: var(--font-num); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
+  .tool-head h2 { margin: 0; font-size: 19px; font-weight: 500; letter-spacing: 0.08em; }
+  .tool-head p { margin: 0; font-size: 13px; color: var(--muted); }
+
+  .label { font-size: 12px; color: var(--muted); letter-spacing: 0.16em; }
+
+  .fields { display: grid; gap: 14px; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; }
+  .input-row { display: flex; align-items: center; gap: 10px; }
+  .input-row input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-num);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--input-fg);
+    background: var(--kinari);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 9px 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .input-row input:hover { border-color: var(--line-strong); }
+  .input-row input:focus-visible { outline: none; border-color: var(--fg); background: var(--bg); }
+  .input-row input[aria-invalid="true"] { border-color: var(--accent); }
+  .unit { width: 44px; font-size: 13px; color: var(--muted); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-family: var(--font-num);
+    font-size: 12px;
+    padding: 2px 10px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--line-strong); color: var(--fg); }
+  .chip:focus-visible { outline: 1px solid var(--fg); outline-offset: 1px; }
+  .chip[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); background: var(--kinari); }
+
+  .results { margin: 0; display: grid; border-top: 1px solid var(--line); }
+  .result {
+    display: grid;
+    grid-template-columns: 1fr auto 44px;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .result dt { font-size: 13px; }
+  .result dd {
+    margin: 0;
+    font-family: var(--font-num);
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .result .u { font-size: 12px; color: var(--muted); }
+  .result.key dd { font-size: 22px; color: var(--accent); }
+
+  .formula {
+    margin: 0;
+    font-family: var(--font-num);
+    font-size: 12px;
+    line-height: 1.9;
+    color: var(--muted);
+    overflow-x: auto;
+  }
+
+  .notes { display: grid; gap: 8px; max-width: 72ch; font-size: 13px; color: var(--muted); }
+  .notes h3 { margin: 0; font-size: 13px; font-weight: 500; color: var(--fg); letter-spacing: 0.16em; }
+  .notes ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  footer .wrap { padding-block: 20px; font-size: 12px; color: var(--muted); display: block; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <img class="logo" src="assets/jidien-logo.png" alt="JIDIEN 中和碁電" width="801" height="113">
+    <span class="topbar-tag">CIS TOOLS</span>
+  </div>
+</div>
+
+<main class="wrap">
+  <header class="intro">
+    <div class="eyebrow">1 INCH = 25.4 MM</div>
+    <h1>CIS DPI 與掃描時間換算</h1>
+    <p class="lede">在米色欄位輸入數字，下方會即時算出結果。三個工具各自獨立，可以分別輸入。</p>
+  </header>
+
+  <div class="grid">
+    <section class="tool" aria-labelledby="t1">
+      <div class="tool-head">
+        <span class="tool-no">01</span>
+        <h2 id="t1">DPI 換算</h2>
+        <p>已知 DPI 和寬度，求像素大小和幾 K</p>
+      </div>
+      <div class="fields">
+        <div class="label">輸入</div>
+        <div class="field">
+          <label for="a-dpi">DPI</label>
+          <div class="input-row"><input id="a-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"><span class="unit">dpi</span></div>
+          <div class="chips" data-for="a-dpi"><button type="button" class="chip">600</button><button type="button" class="chip">1200</button><button type="button" class="chip">1800</button><button type="button" class="chip">3600</button></div>
+        </div>
+        <div class="field">
+          <label for="a-w">掃描寬度</label>
+          <div class="input-row"><input id="a-w" type="number" inputmode="decimal" min="0" step="any" value="300"><span class="unit">mm</span></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="label">結果</div>
+        <dl class="results">
+          <div class="result key"><dt>每個像素大小</dt><dd id="a-px">—</dd><span class="u">µm</span></div>
+          <div class="result"><dt>一條線有幾個像素</dt><dd id="a-n">—</dd><span class="u">像素</span></div>
+          <div class="result key"><dt>約幾 K</dt><dd id="a-k">—</dd><span class="u">K</span></div>
+          <div class="result"><dt>最小可抓瑕疵（5 像素）</dt><dd id="a-d5">—</dd><span class="u">mm</span></div>
+          <div class="result"><dt>穩定可抓瑕疵（10 像素）</dt><dd id="a-d10">—</dd><span class="u">mm</span></div>
+        </dl>
+        <p class="formula">像素大小 = 25.4 ÷ DPI<br>像素數 = 寬度 ÷ 25.4 × DPI</p>
+      </div>
+    </section>
+
+    <section class="tool" aria-labelledby="t2">
+      <div class="tool-head">
+        <span class="tool-no">02</span>
+        <h2 id="t2">反算 DPI</h2>
+        <p>已知幾 K 和寬度，求需要多少 DPI</p>
+      </div>
+      <div class="fields">
+        <div class="label">輸入</div>
+        <div class="field">
+          <label for="b-k">相機像素數（幾 K）</label>
+          <div class="input-row"><input id="b-k" type="number" inputmode="decimal" min="0" step="any" value="16"><span class="unit">K</span></div>
+          <div class="chips" data-for="b-k"><button type="button" class="chip">4</button><button type="button" class="chip">8</button><button type="button" class="chip">16</button><button type="button" class="chip">32</button></div>
+        </div>
+        <div class="field">
+          <label for="b-w">掃描寬度</label>
+          <div class="input-row"><input id="b-w" type="number" inputmode="decimal" min="0" step="any" value="300"><span class="unit">mm</span></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="label">結果</div>
+        <dl class="results">
+          <div class="result key"><dt>DPI（1K = 1,000）</dt><dd id="b-dpi">—</dd><span class="u">dpi</span></div>
+          <div class="result"><dt>DPI（1K = 1,024）</dt><dd id="b-dpi2">—</dd><span class="u">dpi</span></div>
+          <div class="result"><dt>每個像素大小</dt><dd id="b-px">—</dd><span class="u">µm</span></div>
+          <div class="result"><dt>最小可抓瑕疵（5 像素）</dt><dd id="b-d5">—</dd><span class="u">mm</span></div>
+          <div class="result"><dt>穩定可抓瑕疵（10 像素）</dt><dd id="b-d10">—</dd><span class="u">mm</span></div>
+        </dl>
+        <p class="formula">DPI = 像素數 ÷（寬度 ÷ 25.4）</p>
+      </div>
+    </section>
+
+    <section class="tool" aria-labelledby="t3">
+      <div class="tool-head">
+        <span class="tool-no">03</span>
+        <h2 id="t3">掃描時間</h2>
+        <p>已知 DPI、行頻和長度，求掃描速度和時間</p>
+      </div>
+      <div class="fields">
+        <div class="label">輸入</div>
+        <div class="field">
+          <label for="c-dpi">DPI</label>
+          <div class="input-row"><input id="c-dpi" type="number" inputmode="decimal" min="0" step="any" value="1800"><span class="unit">dpi</span></div>
+          <div class="chips" data-for="c-dpi"><button type="button" class="chip">600</button><button type="button" class="chip">1200</button><button type="button" class="chip">1800</button><button type="button" class="chip">3600</button></div>
+        </div>
+        <div class="field">
+          <label for="c-lr">行頻（line rate）</label>
+          <div class="input-row"><input id="c-lr" type="number" inputmode="decimal" min="0" step="any" value="20"><span class="unit">kHz</span></div>
+        </div>
+        <div class="field">
+          <label for="c-len">掃描長度（走料方向）</label>
+          <div class="input-row"><input id="c-len" type="number" inputmode="decimal" min="0" step="any" value="297"><span class="unit">mm</span></div>
+        </div>
+      </div>
+      <div class="fields">
+        <div class="label">結果</div>
+        <dl class="results">
+          <div class="result"><dt>掃描速度</dt><dd id="c-v">—</dd><span class="u">mm/s</span></div>
+          <div class="result"><dt>掃描速度</dt><dd id="c-vm">—</dd><span class="u">m/min</span></div>
+          <div class="result"><dt>總共幾條掃描線</dt><dd id="c-lines">—</dd><span class="u">條</span></div>
+          <div class="result key"><dt>掃描時間</dt><dd id="c-t">—</dd><span class="u">秒</span></div>
+        </dl>
+        <p class="formula">掃描速度 = 行頻 × 像素大小<br>掃描線數 = 長度 ÷ 25.4 × DPI<br>掃描時間 = 掃描線數 ÷ 行頻</p>
+      </div>
+    </section>
+  </div>
+
+  <aside class="notes">
+    <h3>說明</h3>
+    <ul>
+      <li>預設數值是範例，請改成實際規格。行頻請填 CIS 規格書上，該 DPI 對應的最高行頻。</li>
+      <li>掃描時間不需要寬度：CIS 一次就拍完整條寬度，寬度只影響每秒的資料量。</li>
+      <li>相機規格的 K 通常是 1,024 的倍數（16K = 16,384 像素）；行頻的 kHz 一律是 1,000。</li>
+      <li>可抓瑕疵大小是經驗值（瑕疵佔 5～10 像素），實際還會受鏡頭清晰度、景深與對比影響。</li>
+    </ul>
+  </aside>
+</main>
+
+<footer>
+  <div class="wrap">© JIDIEN 中和碁電</div>
+</footer>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const num = (id) => {
+    const el = $(id);
+    const raw = el.value.trim();
+    const v = parseFloat(raw);
+    const ok = raw !== "" && Number.isFinite(v) && v > 0;
+    el.setAttribute("aria-invalid", raw !== "" && !ok ? "true" : "false");
+    return ok ? v : null;
+  };
+  const fmt = (v, digits) =>
+    v == null ? "—" : v.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  const set = (id, v, digits) => { $(id).textContent = fmt(v, digits); };
+  const all = (...xs) => xs.every((x) => x != null);
+
+  function calc() {
+    // 01: DPI -> pixel size, pixel count
+    const aDpi = num("a-dpi"), aW = num("a-w");
+    const aPx = aDpi ? 25.4 / aDpi : null; // mm
+    set("a-px", aPx && aPx * 1000, 2);
+    set("a-n", all(aDpi, aW) ? aW / 25.4 * aDpi : null, 0);
+    set("a-k", all(aDpi, aW) ? aW / 25.4 * aDpi / 1000 : null, 1);
+    set("a-d5", aPx && aPx * 5, 3);
+    set("a-d10", aPx && aPx * 10, 3);
+
+    // 02: K + width -> DPI
+    const bK = num("b-k"), bW = num("b-w");
+    const okB = all(bK, bW);
+    const bPx = okB ? bW / (bK * 1000) : null; // mm
+    set("b-dpi", okB ? bK * 1000 / (bW / 25.4) : null, 0);
+    set("b-dpi2", okB ? bK * 1024 / (bW / 25.4) : null, 0);
+    set("b-px", bPx && bPx * 1000, 2);
+    set("b-d5", bPx && bPx * 5, 3);
+    set("b-d10", bPx && bPx * 10, 3);
+
+    // 03: scan time
+    const cDpi = num("c-dpi"), cLr = num("c-lr"), cLen = num("c-len");
+    const speed = all(cDpi, cLr) ? cLr * 1000 * 25.4 / cDpi : null; // mm/s
+    const lines = all(cDpi, cLen) ? cLen / 25.4 * cDpi : null;
+    set("c-v", speed, 1);
+    set("c-vm", speed && speed * 60 / 1000, 2);
+    set("c-lines", lines, 0);
+    set("c-t", all(speed, cLen) ? cLen / speed : null, 2);
+
+    document.querySelectorAll(".chips").forEach((group) => {
+      const v = $(group.dataset.for).value.trim();
+      group.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(c.textContent === v)));
+    });
+  }
+
+  document.querySelectorAll("input").forEach((el) => el.addEventListener("input", calc));
+  document.querySelectorAll(".chips").forEach((group) => {
+    group.addEventListener("click", (e) => {
+      const chip = e.target.closest(".chip");
+      if (!chip) return;
+      $(group.dataset.for).value = chip.textContent;
+      calc();
+    });
+  });
+  calc();
+</script>
+</body>
+</html>
