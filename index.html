@@ -75,32 +75,40 @@
   }
   .lede { margin: 0; color: var(--muted); max-width: 60ch; font-size: 14px; }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 0;
-    border-top: 1px solid var(--line-strong);
-  }
+  /* One tool per row: title | inputs | results. Stacks to a single column on narrow screens. */
+  .grid { display: grid; border-top: 1px solid var(--line-strong); }
   .tool {
-    padding: 28px 28px 32px;
+    padding: 48px 0 52px;
     display: grid;
-    gap: 22px;
-    align-content: start;
+    grid-template-columns: 240px minmax(0, 1fr) minmax(0, 1fr);
+    gap: 64px;
+    align-items: start;
     min-width: 0;
     border-bottom: 1px solid var(--line);
   }
-  .tool + .tool { border-left: 1px solid var(--line); }
-  @media (max-width: 960px) { .tool + .tool { border-left: 0; } }
+  @media (max-width: 980px) {
+    .tool { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 40px; padding: 40px 0 44px; }
+    .tool-head { grid-column: 1 / -1; }
+  }
+  @media (max-width: 640px) {
+    .tool { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  }
 
-  .tool-head { display: grid; gap: 2px; }
-  .tool-no { font-family: var(--font-num); font-size: 12px; color: var(--muted); letter-spacing: 0.1em; }
-  .tool-head h2 { margin: 0; font-size: 19px; font-weight: 500; letter-spacing: 0.08em; }
-  .tool-head p { margin: 0; font-size: 13px; color: var(--muted); }
+  .tool-head { display: grid; gap: 6px; }
+  .tool-no { font-family: var(--font-num); font-size: 13px; color: var(--accent); letter-spacing: 0.12em; }
+  .tool-head h2 { margin: 0; font-size: 22px; font-weight: 400; letter-spacing: 0.1em; }
+  .tool-head p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.8; }
 
-  .label { font-size: 12px; color: var(--muted); letter-spacing: 0.16em; }
+  .label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--fg);
+  }
 
-  .fields { display: grid; gap: 14px; }
-  .field { display: grid; gap: 6px; }
+  .fields { display: grid; gap: 22px; align-content: start; min-width: 0; }
+  .field { display: grid; gap: 8px; }
   .field label { font-size: 13px; }
   .input-row { display: flex; align-items: center; gap: 10px; }
   .input-row input {
@@ -133,7 +141,7 @@
     border-left: 1px solid var(--line);
     background: transparent;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 15px;
     cursor: pointer;
   }
   .drop:hover, .drop[aria-expanded="true"] { color: var(--fg); background: var(--bg); }
@@ -189,13 +197,13 @@
   .chip:focus-visible { outline: 1px solid var(--fg); outline-offset: 1px; }
   .chip[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); background: var(--kinari); }
 
-  .results { margin: 0; display: grid; border-top: 1px solid var(--line); }
+  .results { margin: -22px 0 0; display: grid; }
   .result {
     display: grid;
     grid-template-columns: 1fr auto 44px;
     align-items: baseline;
-    gap: 10px;
-    padding: 11px 0;
+    gap: 12px;
+    padding: 14px 0;
     border-bottom: 1px solid var(--line);
   }
   .result dt { font-size: 13px; }
@@ -241,7 +249,7 @@
   <header class="intro">
     <div class="eyebrow">1 INCH = 25.4 MM</div>
     <h1>CIS DPI 與掃描時間換算</h1>
-    <p class="lede">在米色欄位輸入數字，下方會即時算出結果。三個工具各自獨立，可以分別輸入。</p>
+    <p class="lede">在米色欄位輸入數字，結果會即時算出來。三個工具各自獨立，可以分別輸入。</p>
   </header>
 
   <div class="grid">
